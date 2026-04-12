@@ -11,23 +11,20 @@ import statistics
 import module_menghitung_lapisan
 import count_karung
 import jsonfile
-import gpt
+from preprocessing import sharpen_image
+
 count=random.randint(1,400)
-# - Konfigurasi ---
-#WEIGHTS_PATH = 'ncnn/alldataset.pt' 
-# maret dataset
-# WEIGHTS_PATH = 'ds/best.pt' 
-WEIGHTS_PATH = 'ncnn/aprilbackgroundbest.pt' 
+# - Konfig ---
 
+WEIGHTS_PATH = 'ncnn/final.pt' 
 
-# VIDEO_PATH = 'video_data/video_karung_6573.mp4'   
 VIDEO_PATH = 'dataapril/samping/variasi2.mp4'    
  
 CONF_THRES = 0.45
 IOU_THRES = 0.45
 CLASS_NAMES = ['karung'] 
 
-# Konfigurasi Garis Vertikal
+# KonfigGaris Vertikal
 LINE_POSITION_RATIO_R = 0.90
 LINE_POSITION_RATIO_L = 0.20
 LINE_Y_START = 70
@@ -49,9 +46,6 @@ cap = cv2.VideoCapture(VIDEO_PATH)
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
-
-# Output Video
-#out = cv2.VideoWriter('ujicoba/output_video_'+str(count)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 20, (frame_width, frame_height))
 
 # Perhitungan Garis
 column_x_r = int(frame_width * LINE_POSITION_RATIO_R)
@@ -126,11 +120,11 @@ while cap.isOpened():
                 if state_old == 'START_L' and center_x > column_x_r:
                     total_count_L_to_R += 1
                     object_states[obj_id] = 'COUNTED'
-                    print("kanaaan")
+                    print("kanan")
                 elif state_old == 'START_R' and center_x < column_x_l:
                     total_count_R_to_L += 1
                     object_states[obj_id] = 'COUNTED'
-                    print("kiiiiirriiii")
+                    print("kiri")
                     
 
             if center_x < column_x_l and state_old not in ['START_L', 'COUNTED']:
@@ -203,37 +197,23 @@ while cap.isOpened():
             num = 0
             for filename in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, filename)
-                if(file_path[-6:]=='_1.jpg') and state:
+                if(file_path[-6:]=='_3.jpg') and state:
+                    result=sharpen_image(file_path)
+                    cv2.imwrite(file_path, result)
                     module_menghitung_lapisan.lapisan(file_path,caminfo=1)
                     shutil.move(file_path,'folder_foto/')
                     state= False
                     """
                     request: lapis_raspi2,row2 = lapisan()
-                    
                     lapis_raspi1,row1 = lapisan()
-                    
-                    
                     hasil = hitung(C1L1,C1L2,C2L1,C2L2,row1,row2):
-                    atau pakai
-                    hitung(row1,row2)
-                    
+
                     add database -> hasil
                     """
                     # nunggu json
                     # hitung karung
                     # add database
             hapus_tempfile(folder_path)
-            # for filename in os.listdir(folder_path):
-            #     file_path = os.path.join(folder_path, filename)
-            #     try:
-            #         if os.path.isfile(file_path) or os.path.islink(file_path):
-            #             os.unlink(file_path) 
-            #             print(f"hapus file: {filename}")
-            #         elif os.path.isdir(file_path):
-            #             shutil.rmtree(file_path) 
-            #             print(f"hapus directory: {filename}")
-            #     except Exception as e:
-            #         print(f'Failed to delete {file_path}. {e}')
         elif res==[1,0,3]:
             print("tidak hitung")
             hapus_tempfile(folder_path)
@@ -247,16 +227,13 @@ while cap.isOpened():
             object_states.pop(oid, None)
 
     cv2.imshow('kamera', frame)
-    #out.write(frame)
     if cv2.waitKey(1) & 0xFF == ord('q'): break
 
 cap.release()
-#out.release()
 cv2.destroyAllWindows()
 
 cam1,cam2=count_karung.read()
 row1 = jsonfile.load_json_sqlite(cam1[3])
 row2 = jsonfile.load_json_sqlite(cam2[3])
-# final = gpt.hitung(row1,row2)
 final=count_karung.hitung(cam1[0],cam1[1],cam2[0],cam2[1],row1,row2)
 print(f'===== hasil deteksi karung {final} =====')

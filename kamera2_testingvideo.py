@@ -17,10 +17,9 @@ count=random.randint(1,400)
 # --- 1. Konfigurasi ---
 
 # WEIGHTS_PATH = 'ds/best.pt' 
-WEIGHTS_PATH = 'ncnn/aprilbackgroundbest.pt' 
+WEIGHTS_PATH = 'ncnn/final.pt' 
 
-# VIDEO_PATH = 'video_data/video_karung_6573.mp4'   
-VIDEO_PATH = 'dataapril/depan/variasi5.mp4' 
+VIDEO_PATH = 'dataapril/depan/variasi4.mp4' 
 CONF_THRES = 0.45
 IOU_THRES = 0.45
 CLASS_NAMES = ['karung'] 
@@ -52,9 +51,6 @@ cap = cv2.VideoCapture(VIDEO_PATH)
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
-
-# Output Video
-#out = cv2.VideoWriter('ujicoba/output_video_'+str(count)+'.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 20, (frame_width, frame_height))
 
 # Perhitungan Garis
 column_x_a = int(frame_height * LINE_POSITION_RATIO_A)
@@ -95,20 +91,17 @@ while cap.isOpened():
     ret, frame = cap.read()
     if not ret: break
     
-    frame[0:CENTER_AREA_NONE, :] = [0, 0, 255]
+    # frame[0:CENTER_AREA_NONE, :] = [0, 0, 255]
     original_frame = frame.copy()
 
     # Inferensi
     # persist=True penting jika ingin menggunakan tracker bawaan (id)
-    results = model.track(frame, persist=True, conf=CONF_THRES, iou=IOU_THRES, verbose=False)
+    results = model.track(frame, persist=False, conf=CONF_THRES, iou=IOU_THRES, verbose=False)
     # Gambar Garis Panduan
     cv2.line(frame, (0, column_x_x), (frame_width,column_x_x ), (200,200, 210), 1)
-    
     cv2.line(frame, (0, column_x_a), (frame_width,column_x_a ), (0,255, 0), 1)
     cv2.line(frame, (0, column_x_b, ), (frame_width, column_x_b), (0, 0, 255), 1)
-    # cv2.line(frame, (50,100), (600,100 ), (255, 0, 0), 1)#bgr red
-    # cv2.line(frame, (50,200), (600,200 ), (0, 0, 255), 1)#bgr red
-    # cv2.line(frame, (50,350), (600, 350), (0, 255, 0), 1)#green
+
     frame_centroids = []
     current_ids = []
 
@@ -171,14 +164,11 @@ while cap.isOpened():
             cv2.putText(frame, f'Est. Total: {len(frame_centroids)*2}', (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 1)
             kondisi=0
             temp.append(0)
-            #print(f"capture!{len(frame_centroids)}")
             modus.append(len(frame_centroids))
             now = datetime.now()
 
             filename='temp_file/'+str(now.strftime("%d %B %Y %H:%M:%S_"))+str(num)+'.jpg'
-        
             # filename='temp_file/temp_image_'+str(num)+'.jpg'
-            
             cv2.imwrite(filename,original_frame)
             num+=1
             
@@ -242,9 +232,7 @@ while cap.isOpened():
             object_states.pop(oid, None)
 
     cv2.imshow('Karung Tracking', frame)
-    #out.write(frame)
     if cv2.waitKey(1) & 0xFF == ord('q'): break
 
 cap.release()
-#out.release()
 cv2.destroyAllWindows()
