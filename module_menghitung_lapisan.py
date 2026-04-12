@@ -9,14 +9,10 @@ import jsonfile
 
 
 now = datetime.now()
-# 
-# model_path = 'ncnn/alldataset.pt' 
-# model_path = 'ncnn/bestapril.pt'
 model_path = 'ncnn/final.pt' 
- 
 
-#image_path = 'ujicoba/lapisan/var11.jpg'
 db = '/home/epiphany/yolov11_project/db_cam1'
+#  Jika diperlukan
 def cek_rata(c1,c2):
     pass
     
@@ -50,9 +46,8 @@ def lapisan(image_path,conf_threshold = 0.5,iou_threshold=0.4,toleransi=0.45,cam
     threshold = avg_h * toleransi
 
     # 3. ALGORITMA PENGELOMPOKAN BARIS (HORIZONTAL LAYER)
-    # Urutkan dulu semua berdasarkan Y (posisi vertikal)
+    # Urutkan dulu semua berdasarkan Y 
     objek.sort(key=lambda k: k['cy'])
-
     rows = []
     current_row = []
     simpan_lapisan=[]
@@ -75,16 +70,13 @@ def lapisan(image_path,conf_threshold = 0.5,iou_threshold=0.4,toleransi=0.45,cam
     # Masukkan baris terakhir
     if current_row:
         rows.append(current_row)
-
     # 4. VISUALISASI HASIL
     frame = cv2.imread(image_path)
     
     print(f"--- TERDETEKSI {len(rows)} LAPIS (BARIS) ---")
 
     total_obj = 0
-    
-
-    # Loop per Baris (Lapis Horizontal)
+    # Loop per baris (Lapis Horizontal)
     for r_idx, row_objs in enumerate(rows):
         # Urutkan objek dalam baris dari kiri ke kanan (X)
         row_objs.sort(key=lambda k: k['cx'])
@@ -95,15 +87,10 @@ def lapisan(image_path,conf_threshold = 0.5,iou_threshold=0.4,toleransi=0.45,cam
         # Gambar kotak dan label
         for c_idx, obj in enumerate(row_objs):
             x1, y1, x2, y2 = map(int, obj['box'])
-            # Warna garis Ganti 
-            color = (0, 255, 0) if r_idx % 2 == 0 else (0, 165, 255) # Hijau / Oranye
-            
-            # Gambar Bounding Box Tipis
+            color = (0, 255, 0) if r_idx % 2 == 0 else (0, 165, 255) 
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 1)
-            
-            # Label ID Grid (B=Baris, K=Kolom)
+            # ket. (B=Baris, K=Kolom)
             label = f"B{r_idx+1}.K{c_idx+1}"
-            
             # Background label 
             (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
             cv2.rectangle(frame, (x1, y1 - 15), (x1 + w, y1), color, -1)
@@ -144,8 +131,8 @@ def lapisan(image_path,conf_threshold = 0.5,iou_threshold=0.4,toleransi=0.45,cam
     cv2.destroyAllWindows()
     return data_kamera,rows
     
-    
- # kamera depan variasi 5
+# #### untuk testing  
+# kamera depan variasi 5
 # kamera2,row2 = lapisan("/home/epiphany/yolov11_project/captures/analisis kamera depan/13 Maret 2026 22:24:18_37.jpg")
 # kamera samping
 # kamera1,row1 = lapisan("/home/epiphany/yolov11_project/captures/analisis kamera samping/13 Maret 2026 23:02:08_4.jpg")   
