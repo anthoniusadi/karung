@@ -116,12 +116,12 @@ def lapisan(image_path,conf_threshold = 0.5,iou_threshold=0.4,toleransi=0.45,cam
     # print(hasil)
     # Tampilkan
     if caminfo==1:
-        rows = jsonfile.savejson(rows)
-        database.insert_data1(simpan_lapisan[-1],simpan_lapisan[-2],"-",len(simpan_lapisan),sum(simpan_lapisan),rows)
+        row = jsonfile.savejson(rows)
+        # database.insert_data1(simpan_lapisan[-1],simpan_lapisan[-2],"-",len(simpan_lapisan),sum(simpan_lapisan),row)
         # print("insert database1 done")
     else:
-        rows = jsonfile.savejson(rows)
-        database.insert_data2(simpan_lapisan[-1],simpan_lapisan[-2],"-",len(simpan_lapisan),sum(simpan_lapisan),rows)
+        row = jsonfile.savejson(rows)
+        # database.insert_data2(simpan_lapisan[-1],simpan_lapisan[-2],"-",len(simpan_lapisan),sum(simpan_lapisan),row)
         # print("insert database2 done")
         
     cv2.imwrite(f'folder_deteksi/{image_path[-28:]}',frame)
